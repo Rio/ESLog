@@ -29,14 +29,14 @@ class ZLogHandler(logging.Handler):
         message["message"] = record.msg
 
         # serialize it to json
-        #json_message = json.dumps(message)
+        json_message = json.dumps(message)
 
         # Build a request for zurl in ZHTTP format
         request = dict()
         request["id"] = str(uuid.uuid4())
         request["method"] = "POST"
         request["uri"] = "http://localhost:9200/cube/log"
-        request["body"] = message
+        request["body"] = json_message
 
         # Serialize the entire message to json and
         # prepend it with a "J" so zurl knows what format it is in.
