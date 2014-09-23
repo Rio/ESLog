@@ -8,12 +8,15 @@ import zmq
 
 
 class ZLogHandler(logging.Handler):
-    def __init__(self, host, level=logging.NOTSET):
+    def __init__(self, host, index, type="log", level=logging.NOTSET):
         logging.Handler.__init__(self)
 
         ctx = zmq.Context.instance()
         self.socket = ctx.socket(zmq.DEALER)
         self.socket.connect(host)
+        
+        self.index = index
+        self.type = type
 
         # Set the default log level.
         self.setLevel(level)
@@ -35,7 +38,7 @@ class ZLogHandler(logging.Handler):
         request = dict()
         request["id"] = str(uuid.uuid4())
         request["method"] = "POST"
-        request["uri"] = "http://localhost:9200/cube/log"
+        request["uri"] = "http://localhost:9200/{index}/{type}".format(index=self.index, type=self.type)
         request["body"] = json_message
 
         # Serialize the entire message to json and
