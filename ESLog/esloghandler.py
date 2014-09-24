@@ -2,21 +2,15 @@
 
 from datetime import datetime
 import logging
-
-from elasticsearch import Elasticsearch
+import urllib.request
+import json
 
 
 class ESLogHandler(logging.Handler):
     def __init__(self, host, index, doc_type="log", level=logging.NOTSET):
-        logging.Handler.__init__(self)
+        logging.Handler.__init__(self, level=level)
         
-        self.index = index
-        self.doc_type = doc_type
-        
-        self.es = Elasticsearch(host)
-
-        # Set the default log level.
-        self.setLevel(level)
+        self.url = "http://{host}/{index}/{doc_type}".format(host=host, index=index, doc_type=doc_type)
     # end __init__
 
     def emit(self, record):
@@ -28,6 +22,9 @@ class ESLogHandler(logging.Handler):
         message["lineno"] = record.lineno
         message["message"] = record.msg
         
-        self.es.index(index=self.index, doc_type=self.doc_type, body=message)
+        json_message = json.dumps(message)
+        json_message_bytes = json_message.encode("utf8")
+        
+        urllib.request.urlopen(self.url, data=json_message_bytes)
     # end emit
 # end ESLogHandler
